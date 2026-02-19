@@ -80,7 +80,7 @@ jobs:
 
             ### 🔗 Installation
             ```bash
-            go get github.com/package-register/go-toolkit@${{ steps.version.outputs.version }}
+            go get github.com/package-register/trpc-agent-go-extensions@${{ steps.version.outputs.version }}
             ```
 
             ### 📋 Modules
@@ -141,17 +141,17 @@ jobs:
 
           # Set binary name based on OS
           if [ "$GOOS" = "windows" ]; then
-            BINARY_NAME="go-toolkit-${VERSION}-${GOOS}-${GOARCH}.exe"
+            BINARY_NAME="trpc-agent-go-extensions-${VERSION}-${GOOS}-${GOARCH}.exe"
           else
-            BINARY_NAME="go-toolkit-${VERSION}-${GOOS}-${GOARCH}"
+            BINARY_NAME="trpc-agent-go-extensions-${VERSION}-${GOOS}-${GOARCH}"
           fi
 
           echo "Building for $GOOS/$GOARCH..."
 
           # Create library package instead of binary
           mkdir -p dist
-          echo "# Go Toolkit $VERSION" > "dist/README.md"
-          echo "Installation: go get github.com/package-register/go-toolkit@$VERSION" >> "dist/README.md"
+          echo "# TRPC Agent Go Extensions $VERSION" > "dist/README.md"
+          echo "Installation: go get github.com/package-register/trpc-agent-go-extensions@$VERSION" >> "dist/README.md"
           echo "" >> "dist/README.md"
           echo "## Modules" >> "dist/README.md"
           echo "- build: Cross-platform build tools" >> "dist/README.md"
@@ -230,5 +230,5 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🔗 Installation" >> $GITHUB_STEP_SUMMARY
           echo '```bash' >> $GITHUB_STEP_SUMMARY
-          echo "go get github.com/package-register/go-toolkit@${{ needs.release.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "go get github.com/package-register/trpc-agent-go-extensions@${{ needs.release.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
