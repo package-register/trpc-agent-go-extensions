@@ -1,6 +1,9 @@
 package pipeline
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 func TestParsePrompt(t *testing.T) {
 	content := `---
@@ -48,6 +51,11 @@ func TestParsePromptMissingDelimiter(t *testing.T) {
 }
 
 func TestLoadRealPrompts(t *testing.T) {
+	// Skip if prompts directory doesn't exist (library mode)
+	if _, err := os.Stat("../../prompts"); os.IsNotExist(err) {
+		t.Skip("prompts 目录不存在，跳过测试")
+	}
+
 	prompts, err := LoadPrompts("../../prompts")
 	if err != nil {
 		t.Fatalf("加载 prompts 目录失败: %v", err)
