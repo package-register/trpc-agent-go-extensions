@@ -22,26 +22,26 @@ permissions:
 
 jobs:
   release:
-    name: Create Release
+    name: 🚀 Create Release
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
       upload_url: ${{ steps.create_release.outputs.upload_url }}
 
     steps:
-      - name: Checkout
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Go
+      - name: 🐹 Setup Go Environment
         uses: actions/setup-go@v5
         with:
           go-version: "1.24"
           cache: true
           cache-dependency-path: go.sum
 
-      - name: Get Version
+      - name: 🏷️ Extract Version
         id: version
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
@@ -52,7 +52,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Releasing version: $VERSION"
 
-      - name: Verify Version Format
+      - name: ✅ Validate Version Format
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           if [[ ! $VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -61,12 +61,12 @@ jobs:
             exit 1
           fi
 
-      - name: Run Tests
+      - name: 🧪 Execute Test Suite
         run: |
           echo "🧪 Running tests..."
           go test -v ./...
 
-      - name: Create Release
+      - name: 🚀 Create GitHub Release
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
@@ -103,7 +103,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build:
-    name: Build Binaries
+    name: 📦 Build Binaries
     runs-on: ubuntu-latest
     needs: release
     if: false # 默认跳过二进制构建
@@ -122,17 +122,17 @@ jobs:
             goarch: amd64
 
     steps:
-      - name: Checkout
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Go
+      - name: 🐹 Setup Go Environment
         uses: actions/setup-go@v5
         with:
           go-version: "1.24"
           cache: true
           cache-dependency-path: go.sum
 
-      - name: Build Binary
+      - name: 📦 Build Cross-Platform Binaries
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
@@ -164,7 +164,7 @@ jobs:
           echo "- discovery: Network service discovery" >> "dist/README.md"
           echo "- zerotier: ZeroTier network management API" >> "dist/README.md"
 
-      - name: Upload Release Asset
+      - name: 📤 Upload Release Assets
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*
@@ -172,24 +172,24 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   update-go-mod:
-    name: Update Go Module
+    name: 🔄 Update Go Module
     runs-on: ubuntu-latest
     needs: release
 
     steps:
-      - name: Checkout
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Go
+      - name: 🐹 Setup Go Environment
         uses: actions/setup-go@v5
         with:
           go-version: "1.24"
           cache: true
           cache-dependency-path: go.sum
 
-      - name: Update Go Module
+      - name: 🔄 Update Module Dependencies
         run: |
           VERSION="${{ needs.release.outputs.version }}"
 
@@ -208,20 +208,20 @@ jobs:
             git push
           fi
 
-      - name: Trigger Go module reindex
+      - name: 📡 Trigger Go Proxy Reindex
         run: |
           VERSION="${{ needs.release.outputs.version }}"
           echo "Triggering Go module reindex at proxy.golang.org"
           curl -sSf "https://proxy.golang.org/github.com/${{ github.repository }}/@v/${VERSION}.info" || true
 
   notify:
-    name: Notify Completion
+    name: 📋 Notify Completion
     runs-on: ubuntu-latest
     needs: [release, update-go-mod]
     if: always()
 
     steps:
-      - name: Release Summary
+      - name: 📋 Generate Release Summary
         run: |
           echo "## 🎉 Release Complete!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
