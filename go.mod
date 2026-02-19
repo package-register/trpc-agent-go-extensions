@@ -66,7 +66,3 @@ require (
 	google.golang.org/protobuf v1.36.10 // indirect
 	trpc.group/trpc-go/trpc-a2a-go v0.2.5 // indirect
 )
-
-replace trpc.group/trpc-go/trpc-agent-go => ../trpc-agent-go
-
-replace github.com/package-register/trpc-agent-go-extensions => .
