@@ -7,20 +7,20 @@ import (
 	"github.com/package-register/trpc-agent-go-extensions/pipeline"
 )
 
-// FileTracker implements pipeline.ArtifactTracker.
+// FileTracker implements ArtifactTracker.
 // It tracks produced documents across pipeline steps using a FileSystem interface
 // instead of direct os.Stat calls.
 type FileTracker struct {
 	fs   pipeline.FileSystem
 	mu   sync.RWMutex
-	data map[string]*pipeline.ArtifactInfo
+	data map[string]*ArtifactInfo
 }
 
 // NewFileTracker creates a tracker that uses the provided FileSystem for file access.
 func NewFileTracker(fs pipeline.FileSystem) *FileTracker {
 	return &FileTracker{
 		fs:   fs,
-		data: make(map[string]*pipeline.ArtifactInfo),
+		data: make(map[string]*ArtifactInfo),
 	}
 }
 
@@ -36,7 +36,7 @@ func (t *FileTracker) RecordCompleted(stepID, title, outputPath string) bool {
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	t.data[stepID] = &pipeline.ArtifactInfo{
+	t.data[stepID] = &ArtifactInfo{
 		StepID:    stepID,
 		Title:     title,
 		FilePath:  outputPath,
@@ -49,7 +49,7 @@ func (t *FileTracker) RecordCompleted(stepID, title, outputPath string) bool {
 }
 
 // GetArtifact returns a single artifact by stepID.
-func (t *FileTracker) GetArtifact(stepID string) *pipeline.ArtifactInfo {
+func (t *FileTracker) GetArtifact(stepID string) *ArtifactInfo {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
 	if a, ok := t.data[stepID]; ok {
@@ -60,10 +60,10 @@ func (t *FileTracker) GetArtifact(stepID string) *pipeline.ArtifactInfo {
 }
 
 // GetAll returns a snapshot of all recorded artifacts.
-func (t *FileTracker) GetAll() map[string]*pipeline.ArtifactInfo {
+func (t *FileTracker) GetAll() map[string]*ArtifactInfo {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
-	out := make(map[string]*pipeline.ArtifactInfo, len(t.data))
+	out := make(map[string]*ArtifactInfo, len(t.data))
 	for k, v := range t.data {
 		cp := *v
 		out[k] = &cp

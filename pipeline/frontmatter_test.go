@@ -56,7 +56,7 @@ func TestLoadRealPrompts(t *testing.T) {
 		t.Skip("prompts 目录不存在，跳过测试")
 	}
 
-	prompts, err := LoadPrompts("../../prompts")
+	prompts, err := LoadSteps("../../prompts")
 	if err != nil {
 		t.Fatalf("加载 prompts 目录失败: %v", err)
 	}
@@ -86,7 +86,7 @@ func TestLoadRealPrompts(t *testing.T) {
 	}
 
 	// 验证 fallback map 格式（非 null 的必须是 map）
-	stepMap := make(map[string]*PromptFile)
+	stepMap := make(map[string]*StepDefinition)
 	for _, p := range prompts {
 		stepMap[p.Frontmatter.Step] = p
 	}

@@ -15,6 +15,11 @@ func Init(level string) {
 	global = New(level)
 }
 
+// InitWithLevel sets the global logger level.
+func InitWithLevel(level string) {
+	Init(level)
+}
+
 func L() Logger {
 	if global == nil {
 		global = New("info")

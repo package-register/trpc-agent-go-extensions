@@ -50,7 +50,7 @@ func TestMakeConfirmNode_ConfirmInterrupts(t *testing.T) {
 }
 
 func TestBuildGraphFromPrompts_WithFallbackConfirm(t *testing.T) {
-	prompts := []*PromptFile{
+	prompts := []*StepDefinition{
 		{
 			Path: "1.1.md",
 			Frontmatter: Frontmatter{

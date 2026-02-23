@@ -40,7 +40,7 @@ func NewPromptBuilder(corePromptPath, toolsRefPath string, envBuilder *Environme
 // BuildStaticInstruction constructs the initial system instruction (Layer 1 + static Layer 2 body).
 // This is used at graph build time as the LLM node's instruction.
 // The dynamic parts of Layer 2 (progress, input summaries) are injected at runtime via PreNodeCallback.
-func (b *PromptBuilder) BuildStaticInstruction(prompt *PromptFile, promptRoot string, baseVars map[string]string) (string, error) {
+func (b *PromptBuilder) BuildStaticInstruction(prompt *StepDefinition, promptRoot string, baseVars map[string]string) (string, error) {
 	vars := map[string]string{
 		"output_path": prompt.Frontmatter.PrimaryOutput(),
 		"stage":       prompt.Frontmatter.Step,
@@ -79,7 +79,7 @@ func (b *PromptBuilder) BuildStaticInstruction(prompt *PromptFile, promptRoot st
 // MakePreNodeCallback returns a BeforeNodeCallback that rebuilds the full
 // Layer 1 + Layer 2 system message at runtime, injecting dynamic context
 // (progress, input summaries, available tools, output contract).
-func (b *PromptBuilder) MakePreNodeCallback(stepID string, stepPrompt *PromptFile, baseVars map[string]string) graph.BeforeNodeCallback {
+func (b *PromptBuilder) MakePreNodeCallback(stepID string, stepPrompt *StepDefinition, baseVars map[string]string) graph.BeforeNodeCallback {
 	return func(ctx context.Context, _ *graph.NodeCallbackContext, state graph.State) (any, error) {
 		msgs, ok := state[graph.StateKeyMessages].([]model.Message)
 		if !ok || len(msgs) == 0 {
@@ -105,7 +105,7 @@ func (b *PromptBuilder) MakePreNodeCallback(stepID string, stepPrompt *PromptFil
 }
 
 // buildFullInstruction constructs the complete system message with both static and dynamic content.
-func (b *PromptBuilder) buildFullInstruction(ctx context.Context, stepID string, stepPrompt *PromptFile, baseVars map[string]string) string {
+func (b *PromptBuilder) buildFullInstruction(ctx context.Context, stepID string, stepPrompt *StepDefinition, baseVars map[string]string) string {
 	vars := map[string]string{
 		"output_path": stepPrompt.Frontmatter.PrimaryOutput(),
 		"stage":       stepPrompt.Frontmatter.Step,

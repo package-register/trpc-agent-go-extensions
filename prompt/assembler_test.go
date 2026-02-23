@@ -141,5 +141,5 @@ func TestAssembler_TemplateVars(t *testing.T) {
 
 func TestAssembler_ImplementsInterface(t *testing.T) {
 	fs := newTestFS(nil)
-	var _ pipeline.PromptAssembler = NewAssembler("", "", fs, nil)
+	var _ Assembler = NewAssembler("", "", fs, nil)
 }

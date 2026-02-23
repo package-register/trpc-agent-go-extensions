@@ -3,7 +3,10 @@ package flow
 import (
 	"context"
 
+	"github.com/package-register/trpc-agent-go-extensions/memory"
 	"github.com/package-register/trpc-agent-go-extensions/pipeline"
+	"github.com/package-register/trpc-agent-go-extensions/prompt"
+	"github.com/package-register/trpc-agent-go-extensions/token"
 
 	"trpc.group/trpc-go/trpc-agent-go/graph"
 	"trpc.group/trpc-go/trpc-agent-go/model"
@@ -86,16 +89,16 @@ func (c *MiddlewareChain) WrapPostNode(stepID string, step *pipeline.StepDefinit
 // CompressionMiddleware implements pipeline.Middleware.
 // It checks token usage before each LLM node and triggers compression when needed.
 type CompressionMiddleware struct {
-	compressor pipeline.Compressor
-	counter    pipeline.TokenCounter
-	observer   pipeline.TokenObserver // optional, may be nil
+	compressor memory.Compressor
+	counter    token.Counter
+	observer   token.Observer // optional, may be nil
 }
 
 // NewCompressionMiddleware creates a middleware that compresses context when needed.
 func NewCompressionMiddleware(
-	compressor pipeline.Compressor,
-	counter pipeline.TokenCounter,
-	observer pipeline.TokenObserver,
+	compressor memory.Compressor,
+	counter token.Counter,
+	observer token.Observer,
 ) *CompressionMiddleware {
 	return &CompressionMiddleware{
 		compressor: compressor,
@@ -141,12 +144,12 @@ func (m *CompressionMiddleware) WrapPostNode(_ string, _ *pipeline.StepDefinitio
 // PromptInjectionMiddleware implements pipeline.Middleware.
 // It rebuilds the Layer 1+2 system message at runtime with dynamic context.
 type PromptInjectionMiddleware struct {
-	assembler pipeline.PromptAssembler
+	assembler prompt.Assembler
 	baseVars  map[string]string
 }
 
 // NewPromptInjectionMiddleware creates a middleware that injects dynamic prompts.
-func NewPromptInjectionMiddleware(assembler pipeline.PromptAssembler, baseVars map[string]string) *PromptInjectionMiddleware {
+func NewPromptInjectionMiddleware(assembler prompt.Assembler, baseVars map[string]string) *PromptInjectionMiddleware {
 	return &PromptInjectionMiddleware{
 		assembler: assembler,
 		baseVars:  baseVars,
@@ -190,11 +193,11 @@ func (m *PromptInjectionMiddleware) WrapPostNode(_ string, _ *pipeline.StepDefin
 // ArtifactRecordMiddleware implements pipeline.Middleware.
 // It records step output artifacts after the confirm node completes.
 type ArtifactRecordMiddleware struct {
-	tracker pipeline.ArtifactTracker
+	tracker memory.ArtifactTracker
 }
 
 // NewArtifactRecordMiddleware creates a middleware that records artifacts.
-func NewArtifactRecordMiddleware(tracker pipeline.ArtifactTracker) *ArtifactRecordMiddleware {
+func NewArtifactRecordMiddleware(tracker memory.ArtifactTracker) *ArtifactRecordMiddleware {
 	return &ArtifactRecordMiddleware{tracker: tracker}
 }
 

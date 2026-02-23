@@ -6,23 +6,24 @@ import (
 	"testing"
 	"testing/fstest"
 
+	"github.com/package-register/trpc-agent-go-extensions/memory"
 	"github.com/package-register/trpc-agent-go-extensions/pipeline"
 )
 
-// stubTracker implements pipeline.ArtifactTracker for testing.
+// stubTracker implements memory.ArtifactTracker for testing.
 type stubTracker struct {
-	data map[string]*pipeline.ArtifactInfo
+	data map[string]*memory.ArtifactInfo
 }
 
 func (s stubTracker) RecordCompleted(_, _, _ string) bool { return false }
-func (s stubTracker) GetArtifact(stepID string) *pipeline.ArtifactInfo {
+func (s stubTracker) GetArtifact(stepID string) *memory.ArtifactInfo {
 	return s.data[stepID]
 }
-func (s stubTracker) GetAll() map[string]*pipeline.ArtifactInfo {
+func (s stubTracker) GetAll() map[string]*memory.ArtifactInfo {
 	return s.data
 }
 
-// stubSummarizer implements pipeline.InputSummarizer for testing.
+// stubSummarizer implements InputSummarizer for testing.
 type stubSummarizer struct {
 	summary string
 }
@@ -38,7 +39,7 @@ func TestSnapshot_BuildProgress(t *testing.T) {
 		{Frontmatter: pipeline.Frontmatter{Step: "1.3", Title: "规划", Output: pipeline.OutputField{"docs/c.md"}}},
 	}
 
-	tracker := stubTracker{data: map[string]*pipeline.ArtifactInfo{
+	tracker := stubTracker{data: map[string]*memory.ArtifactInfo{
 		"1.1": {StepID: "1.1", Status: "completed", LineCount: 50},
 	}}
 
@@ -71,7 +72,7 @@ func TestSnapshot_BuildInputSummaries(t *testing.T) {
 		},
 	}
 
-	snap := NewSnapshot(nil, stubTracker{data: map[string]*pipeline.ArtifactInfo{}}, stubSummarizer{summary: "摘要内容"}, nil, fs)
+	snap := NewSnapshot(nil, stubTracker{data: map[string]*memory.ArtifactInfo{}}, stubSummarizer{summary: "摘要内容"}, nil, fs)
 	result := snap.BuildSnapshot(context.Background(), "1.2", step)
 
 	if !strings.Contains(result, "摘要内容") {
@@ -100,7 +101,7 @@ func TestSnapshot_BuildAvailableTools(t *testing.T) {
 		return nil
 	}
 
-	snap := NewSnapshot(nil, stubTracker{data: map[string]*pipeline.ArtifactInfo{}}, stubSummarizer{}, toolNames, newTestFS(nil))
+	snap := NewSnapshot(nil, stubTracker{data: map[string]*memory.ArtifactInfo{}}, stubSummarizer{}, toolNames, newTestFS(nil))
 	result := snap.BuildSnapshot(context.Background(), "3.1", step)
 
 	if !strings.Contains(result, "[eda] 2个工具: simulate_verilog, synthesize_verilog") {
@@ -116,7 +117,7 @@ func TestSnapshot_BuildAvailableTools_NoTools(t *testing.T) {
 		Frontmatter: pipeline.Frontmatter{Step: "1.1"},
 	}
 
-	snap := NewSnapshot(nil, stubTracker{data: map[string]*pipeline.ArtifactInfo{}}, stubSummarizer{}, nil, newTestFS(nil))
+	snap := NewSnapshot(nil, stubTracker{data: map[string]*memory.ArtifactInfo{}}, stubSummarizer{}, nil, newTestFS(nil))
 	result := snap.BuildSnapshot(context.Background(), "1.1", step)
 
 	if !strings.Contains(result, "当前步骤无额外工具") {
@@ -134,7 +135,7 @@ func TestSnapshot_BuildOutputContract(t *testing.T) {
 		},
 	}
 
-	snap := NewSnapshot(nil, stubTracker{data: map[string]*pipeline.ArtifactInfo{}}, stubSummarizer{}, nil, newTestFS(nil))
+	snap := NewSnapshot(nil, stubTracker{data: map[string]*memory.ArtifactInfo{}}, stubSummarizer{}, nil, newTestFS(nil))
 	result := snap.BuildSnapshot(context.Background(), "1.2", step)
 
 	if !strings.Contains(result, "目标文件: docs/output.md") {
@@ -149,5 +150,5 @@ func TestSnapshot_BuildOutputContract(t *testing.T) {
 }
 
 func TestSnapshot_ImplementsInterface(t *testing.T) {
-	var _ pipeline.ContextSnapshot = NewSnapshot(nil, stubTracker{data: map[string]*pipeline.ArtifactInfo{}}, stubSummarizer{}, nil, newTestFS(nil))
+	var _ ContextSnapshot = NewSnapshot(nil, stubTracker{data: map[string]*memory.ArtifactInfo{}}, stubSummarizer{}, nil, newTestFS(nil))
 }

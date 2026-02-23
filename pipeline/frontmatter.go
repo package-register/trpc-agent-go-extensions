@@ -68,22 +68,18 @@ func (f *Frontmatter) PrimaryOutput() string {
 	return ""
 }
 
-// PromptFile represents a prompt file with parsed frontmatter and body.
-type PromptFile struct {
+// StepDefinition represents a pipeline step with parsed frontmatter and body.
+type StepDefinition struct {
 	Path        string
 	Frontmatter Frontmatter
 	Body        string
 }
 
-// StepDefinition is the canonical name for a pipeline step.
-// PromptFile is retained as an alias for backward compatibility.
-type StepDefinition = PromptFile
-
-// LoadPrompt reads and parses a prompt file from disk.
-func LoadPrompt(path string) (*PromptFile, error) {
+// LoadStep reads and parses a step definition file from disk.
+func LoadStep(path string) (*StepDefinition, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("read prompt: %w", err)
+		return nil, fmt.Errorf("read step: %w", err)
 	}
 
 	frontmatter, body, err := ParsePrompt(string(content))
@@ -91,7 +87,7 @@ func LoadPrompt(path string) (*PromptFile, error) {
 		return nil, err
 	}
 
-	return &PromptFile{
+	return &StepDefinition{
 		Path:        path,
 		Frontmatter: frontmatter,
 		Body:        body,

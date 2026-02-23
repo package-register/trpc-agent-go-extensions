@@ -12,7 +12,7 @@ import (
 	"trpc.group/trpc-go/trpc-agent-go/tool"
 )
 
-func buildInstruction(prompt *PromptFile, promptRoot string, baseVars map[string]string, systemInstruction string) (string, error) {
+func buildInstruction(prompt *StepDefinition, promptRoot string, baseVars map[string]string, systemInstruction string) (string, error) {
 	vars := map[string]string{
 		"output_path": prompt.Frontmatter.PrimaryOutput(),
 		"stage":       prompt.Frontmatter.Step,

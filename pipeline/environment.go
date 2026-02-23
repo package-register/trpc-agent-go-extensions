@@ -23,7 +23,7 @@ import (
 type EnvironmentBuilder struct {
 	llmModel  model.Model
 	baseDir   string
-	prompts   []*PromptFile
+	prompts   []*StepDefinition
 	artifacts *FileArtifactTracker
 	toolSets  map[string]tool.ToolSet
 
@@ -36,7 +36,7 @@ type EnvironmentBuilder struct {
 func NewEnvironmentBuilder(
 	llmModel model.Model,
 	baseDir string,
-	prompts []*PromptFile,
+	prompts []*StepDefinition,
 	artifacts *FileArtifactTracker,
 	toolSets map[string]tool.ToolSet,
 ) *EnvironmentBuilder {
@@ -51,7 +51,7 @@ func NewEnvironmentBuilder(
 }
 
 // BuildSnapshot produces the full <WorkflowContext> XML for a given step.
-func (b *EnvironmentBuilder) BuildSnapshot(ctx context.Context, currentStepID string, stepPrompt *PromptFile) string {
+func (b *EnvironmentBuilder) BuildSnapshot(ctx context.Context, currentStepID string, stepPrompt *StepDefinition) string {
 	var sb strings.Builder
 	sb.WriteString("<WorkflowContext>\n")
 
@@ -96,7 +96,7 @@ func (b *EnvironmentBuilder) buildProgress(currentStepID string) string {
 }
 
 // buildInputSummaries generates LLM-powered summaries for input files/dirs.
-func (b *EnvironmentBuilder) buildInputSummaries(ctx context.Context, stepPrompt *PromptFile) string {
+func (b *EnvironmentBuilder) buildInputSummaries(ctx context.Context, stepPrompt *StepDefinition) string {
 	inputs := stepPrompt.Frontmatter.Input
 	if len(inputs) == 0 {
 		return ""
@@ -230,7 +230,7 @@ func fallbackSummary(content string) string {
 }
 
 // buildAvailableTools lists tools available for the current step.
-func (b *EnvironmentBuilder) buildAvailableTools(stepPrompt *PromptFile) string {
+func (b *EnvironmentBuilder) buildAvailableTools(stepPrompt *StepDefinition) string {
 	var sb strings.Builder
 	sb.WriteString("  <AvailableTools>\n")
 
@@ -263,7 +263,7 @@ func (b *EnvironmentBuilder) buildAvailableTools(stepPrompt *PromptFile) string 
 }
 
 // buildOutputContract specifies what this step must produce.
-func (b *EnvironmentBuilder) buildOutputContract(stepPrompt *PromptFile) string {
+func (b *EnvironmentBuilder) buildOutputContract(stepPrompt *StepDefinition) string {
 	var sb strings.Builder
 	sb.WriteString("  <OutputContract>\n")
 	for _, out := range stepPrompt.Frontmatter.Output {
@@ -288,7 +288,7 @@ func (b *EnvironmentBuilder) buildOutputContract(stepPrompt *PromptFile) string 
 
 // Deprecated: MakePreNodeCallback is replaced by PromptBuilder.MakePreNodeCallback.
 // Kept for backward compatibility when PromptBuilder is not configured.
-func (b *EnvironmentBuilder) MakePreNodeCallback(stepID string, stepPrompt *PromptFile) graph.BeforeNodeCallback {
+func (b *EnvironmentBuilder) MakePreNodeCallback(stepID string, stepPrompt *StepDefinition) graph.BeforeNodeCallback {
 	return func(ctx context.Context, _ *graph.NodeCallbackContext, state graph.State) (any, error) {
 		snapshot := b.BuildSnapshot(ctx, stepID, stepPrompt)
 

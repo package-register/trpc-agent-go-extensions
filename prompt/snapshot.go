@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/package-register/trpc-agent-go-extensions/memory"
 	"github.com/package-register/trpc-agent-go-extensions/pipeline"
 )
 
@@ -13,8 +14,8 @@ import (
 // using only interfaces for its dependencies (no concrete types).
 type Snapshot struct {
 	steps      []*pipeline.StepDefinition
-	tracker    pipeline.ArtifactTracker
-	summarizer pipeline.InputSummarizer
+	tracker    memory.ArtifactTracker
+	summarizer InputSummarizer
 	toolNames  func(string) []string // stepID → tool names for that step
 	fs         pipeline.FileSystem
 }
@@ -28,8 +29,8 @@ type Snapshot struct {
 //   - fs: filesystem for checking input file/dir existence
 func NewSnapshot(
 	steps []*pipeline.StepDefinition,
-	tracker pipeline.ArtifactTracker,
-	summarizer pipeline.InputSummarizer,
+	tracker memory.ArtifactTracker,
+	summarizer InputSummarizer,
 	toolNames func(string) []string,
 	fs pipeline.FileSystem,
 ) *Snapshot {

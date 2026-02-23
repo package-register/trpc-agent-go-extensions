@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/package-register/trpc-agent-go-extensions/memory"
 	"github.com/package-register/trpc-agent-go-extensions/pipeline"
 
 	"trpc.group/trpc-go/trpc-agent-go/graph"
@@ -200,7 +201,7 @@ func TestArtifactRecordMiddleware_NoOutput(t *testing.T) {
 	}
 }
 
-// stubTracker implements pipeline.ArtifactTracker for testing.
+// stubTracker implements memory.ArtifactTracker for testing.
 type stubTracker struct {
 	recorded bool
 }
@@ -209,5 +210,5 @@ func (s *stubTracker) RecordCompleted(_, _, _ string) bool {
 	s.recorded = true
 	return true
 }
-func (s *stubTracker) GetArtifact(_ string) *pipeline.ArtifactInfo { return nil }
-func (s *stubTracker) GetAll() map[string]*pipeline.ArtifactInfo    { return nil }
+func (s *stubTracker) GetArtifact(_ string) *memory.ArtifactInfo { return nil }
+func (s *stubTracker) GetAll() map[string]*memory.ArtifactInfo    { return nil }

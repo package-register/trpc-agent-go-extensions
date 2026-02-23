@@ -7,16 +7,16 @@ import (
 	"github.com/package-register/trpc-agent-go-extensions/pipeline"
 )
 
-// Assembler implements pipeline.PromptAssembler.
+// DefaultAssembler implements the Assembler interface.
 // It constructs the 3-layer prompt for each LLM node:
 //
 //   - Layer 1: <system_core_prompt> — role, principles, base tools (never compressed)
 //   - Layer 2: <pkg_inject_prompt> — step context, progress, tools, output contract (never compressed)
 //   - Layer 3: conversation history — user/assistant messages (compression target)
-type Assembler struct {
+type DefaultAssembler struct {
 	corePrompt     string
 	toolsReference string
-	snapshot       pipeline.ContextSnapshot // nil = no dynamic content
+	snapshot       ContextSnapshot // nil = no dynamic content
 }
 
 // NewAssembler creates a builder with Layer 1 content loaded from the filesystem.
@@ -24,9 +24,9 @@ func NewAssembler(
 	corePromptPath string,
 	toolsRefPath string,
 	fs pipeline.FileSystem,
-	snapshot pipeline.ContextSnapshot,
-) *Assembler {
-	a := &Assembler{
+	snapshot ContextSnapshot,
+) *DefaultAssembler {
+	a := &DefaultAssembler{
 		snapshot: snapshot,
 	}
 	if data, err := fs.ReadFile(corePromptPath); err == nil {
@@ -40,7 +40,7 @@ func NewAssembler(
 
 // BuildStatic constructs the initial system instruction (Layer 1 + static Layer 2 body).
 // Used at graph build time as the LLM node's instruction.
-func (a *Assembler) BuildStatic(step *pipeline.StepDefinition, vars map[string]string) (string, error) {
+func (a *DefaultAssembler) BuildStatic(step *pipeline.StepDefinition, vars map[string]string) (string, error) {
 	mergedVars := a.mergeVars(step, vars)
 	body := pipeline.RenderTemplate(step.Body, mergedVars)
 
@@ -52,7 +52,7 @@ func (a *Assembler) BuildStatic(step *pipeline.StepDefinition, vars map[string]s
 
 // BuildDynamic constructs the complete system message with both static and dynamic content.
 // Used at runtime via PreNodeCallback to inject progress, input summaries, etc.
-func (a *Assembler) BuildDynamic(ctx context.Context, step *pipeline.StepDefinition, vars map[string]string) (string, error) {
+func (a *DefaultAssembler) BuildDynamic(ctx context.Context, step *pipeline.StepDefinition, vars map[string]string) (string, error) {
 	mergedVars := a.mergeVars(step, vars)
 	body := pipeline.RenderTemplate(step.Body, mergedVars)
 
@@ -74,12 +74,12 @@ func (a *Assembler) BuildDynamic(ctx context.Context, step *pipeline.StepDefinit
 }
 
 // HasDynamicContent reports whether runtime rebuild is needed.
-func (a *Assembler) HasDynamicContent() bool {
+func (a *DefaultAssembler) HasDynamicContent() bool {
 	return a.snapshot != nil
 }
 
 // mergeVars creates the template variable map with step defaults + caller overrides.
-func (a *Assembler) mergeVars(step *pipeline.StepDefinition, vars map[string]string) map[string]string {
+func (a *DefaultAssembler) mergeVars(step *pipeline.StepDefinition, vars map[string]string) map[string]string {
 	merged := map[string]string{
 		"output_path": step.Frontmatter.PrimaryOutput(),
 		"stage":       step.Frontmatter.Step,
@@ -91,7 +91,7 @@ func (a *Assembler) mergeVars(step *pipeline.StepDefinition, vars map[string]str
 }
 
 // writeLayer1 writes the <system_core_prompt> section.
-func (a *Assembler) writeLayer1(sb *strings.Builder) {
+func (a *DefaultAssembler) writeLayer1(sb *strings.Builder) {
 	sb.WriteString("<system_core_prompt>\n")
 	sb.WriteString(a.corePrompt)
 	if a.toolsReference != "" {
@@ -103,7 +103,7 @@ func (a *Assembler) writeLayer1(sb *strings.Builder) {
 }
 
 // writeStaticLayer2 writes the static <pkg_inject_prompt> section (body only, no dynamic context).
-func (a *Assembler) writeStaticLayer2(sb *strings.Builder, body string) {
+func (a *DefaultAssembler) writeStaticLayer2(sb *strings.Builder, body string) {
 	sb.WriteString("<pkg_inject_prompt>\n")
 	sb.WriteString("<pkg_prompt>\n")
 	sb.WriteString(body)

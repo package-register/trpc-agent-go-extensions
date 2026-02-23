@@ -46,7 +46,7 @@ func BuildGraphFromDir(opts BuildOptions) (*graph.Graph, error) {
 		return nil, fmt.Errorf("model is required")
 	}
 
-	promptFiles, err := LoadPrompts(opts.PromptsDir)
+	promptFiles, err := LoadSteps(opts.PromptsDir)
 	if err != nil {
 		return nil, err
 	}
@@ -54,9 +54,9 @@ func BuildGraphFromDir(opts BuildOptions) (*graph.Graph, error) {
 	return BuildGraphFromPrompts(promptFiles, opts)
 }
 
-// LoadPrompts scans a directory and parses prompt files.
-func LoadPrompts(dir string) ([]*PromptFile, error) {
-	var prompts []*PromptFile
+// LoadSteps scans a directory and parses prompt files.
+func LoadSteps(dir string) ([]*StepDefinition, error) {
+	var prompts []*StepDefinition
 
 	err := filepath.WalkDir(dir, func(path string, entry fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -75,7 +75,7 @@ func LoadPrompts(dir string) ([]*PromptFile, error) {
 			return nil
 		}
 
-		prompt, err := LoadPrompt(path)
+		prompt, err := LoadStep(path)
 		if err != nil {
 			return err
 		}
@@ -98,7 +98,7 @@ func LoadPrompts(dir string) ([]*PromptFile, error) {
 }
 
 // BuildGraphFromPrompts constructs a StateGraph from prompt definitions.
-func BuildGraphFromPrompts(prompts []*PromptFile, opts BuildOptions) (*graph.Graph, error) {
+func BuildGraphFromPrompts(prompts []*StepDefinition, opts BuildOptions) (*graph.Graph, error) {
 	if len(prompts) == 0 {
 		return nil, fmt.Errorf("no prompts to build graph")
 	}

@@ -9,7 +9,7 @@ import (
 	"github.com/package-register/trpc-agent-go-extensions/pipeline"
 )
 
-// FileStepLoader implements pipeline.StepLoader.
+// FileStepLoader implements Loader.
 // It loads step definitions from a filesystem directory, skipping
 // "templates/" and "system/" subdirectories and "_" prefixed files.
 type FileStepLoader struct {
@@ -87,12 +87,12 @@ func (l *FileStepLoader) walkDir(dir string, fn func(string) error) error {
 
 // FilteredStepLoader wraps another StepLoader and filters by step ID prefix.
 type FilteredStepLoader struct {
-	inner  pipeline.StepLoader
+	inner  Loader
 	prefix string
 }
 
 // NewFilteredStepLoader creates a loader that only returns steps whose ID starts with prefix.
-func NewFilteredStepLoader(inner pipeline.StepLoader, prefix string) *FilteredStepLoader {
+func NewFilteredStepLoader(inner Loader, prefix string) *FilteredStepLoader {
 	return &FilteredStepLoader{inner: inner, prefix: prefix}
 }
 
@@ -118,11 +118,11 @@ func (l *FilteredStepLoader) Load() ([]*pipeline.StepDefinition, error) {
 
 // CompositeStepLoader merges results from multiple StepLoaders.
 type CompositeStepLoader struct {
-	loaders []pipeline.StepLoader
+	loaders []Loader
 }
 
 // NewCompositeStepLoader creates a loader that merges multiple sources.
-func NewCompositeStepLoader(loaders ...pipeline.StepLoader) *CompositeStepLoader {
+func NewCompositeStepLoader(loaders ...Loader) *CompositeStepLoader {
 	return &CompositeStepLoader{loaders: loaders}
 }
 
@@ -175,8 +175,8 @@ func (l *InMemoryStepLoader) Load() ([]*pipeline.StepDefinition, error) {
 
 // Verify interface compliance at compile time.
 var (
-	_ pipeline.StepLoader = (*FileStepLoader)(nil)
-	_ pipeline.StepLoader = (*FilteredStepLoader)(nil)
-	_ pipeline.StepLoader = (*CompositeStepLoader)(nil)
-	_ pipeline.StepLoader = (*InMemoryStepLoader)(nil)
+	_ Loader = (*FileStepLoader)(nil)
+	_ Loader = (*FilteredStepLoader)(nil)
+	_ Loader = (*CompositeStepLoader)(nil)
+	_ Loader = (*InMemoryStepLoader)(nil)
 )

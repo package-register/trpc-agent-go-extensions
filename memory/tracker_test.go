@@ -4,8 +4,6 @@ import (
 	"io/fs"
 	"testing"
 	"testing/fstest"
-
-	"github.com/package-register/trpc-agent-go-extensions/pipeline"
 )
 
 // testFS wraps fstest.MapFS to implement pipeline.FileSystem.
@@ -109,5 +107,5 @@ func TestFileTracker_GetArtifact_Snapshot(t *testing.T) {
 
 func TestFileTracker_ImplementsInterface(t *testing.T) {
 	tfs := testFS{fstest.MapFS{}}
-	var _ pipeline.ArtifactTracker = NewFileTracker(tfs)
+	var _ ArtifactTracker = NewFileTracker(tfs)
 }

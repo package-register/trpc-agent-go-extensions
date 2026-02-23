@@ -44,15 +44,15 @@ func IsEnabled() bool {
 type LangfuseAttributes struct{}
 
 // Trace 属性
-func (LangfuseAttributes) TraceName() string          { return "langfuse.trace.name" }
-func (LangfuseAttributes) UserID() string             { return "langfuse.user.id" }
-func (LangfuseAttributes) SessionID() string          { return "langfuse.session.id" }
-func (LangfuseAttributes) TraceInput() string         { return "langfuse.trace.input" }
-func (LangfuseAttributes) TraceOutput() string        { return "langfuse.trace.output" }
-func (LangfuseAttributes) TraceTags() string          { return "langfuse.trace.tags" }
-func (LangfuseAttributes) ObservationType() string    { return "langfuse.observation.type" }
-func (LangfuseAttributes) ObservationModel() string   { return "langfuse.observation.model.name" }
-func (LangfuseAttributes) Environment() string        { return "langfuse.environment" }
+func (LangfuseAttributes) TraceName() string          { return AttrTraceName }
+func (LangfuseAttributes) UserID() string             { return AttrTraceUserID }
+func (LangfuseAttributes) SessionID() string          { return AttrTraceSessionID }
+func (LangfuseAttributes) TraceInput() string         { return AttrTraceInput }
+func (LangfuseAttributes) TraceOutput() string        { return AttrTraceOutput }
+func (LangfuseAttributes) TraceTags() string          { return AttrTraceTags }
+func (LangfuseAttributes) ObservationType() string    { return AttrObservationType }
+func (LangfuseAttributes) ObservationModel() string   { return AttrObservationModel }
+func (LangfuseAttributes) ObservationLevel() string   { return AttrObservationLevel }
 
 // LF 预定义的 Langfuse 属性辅助实例
 var LF = LangfuseAttributes{}

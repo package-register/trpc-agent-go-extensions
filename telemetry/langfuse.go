@@ -7,13 +7,15 @@ import (
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
+	"github.com/package-register/trpc-agent-go-extensions/config"
 	atrace "trpc.group/trpc-go/trpc-agent-go/telemetry/trace"
 	"trpc.group/trpc-go/trpc-agent-go/telemetry/langfuse"
 )
 
 // langfuseTracer Langfuse 追踪器实现
 type langfuseTracer struct {
-	cleanup  func(ctx context.Context) error
+	cfg      config.LangfuseConfig
+	cleanup  func(context.Context) error
 	enabled  bool
 	initOnce sync.Once
 	initErr  error
@@ -24,15 +26,11 @@ type langfuseSpan struct {
 	span trace.Span
 }
 
-// NewLangfuse 创建 Langfuse 追踪器
-// 参数：
-//   - secretKey: Langfuse 密钥
-//   - publicKey: Langfuse 公钥
-//   - host: Langfuse 服务器地址
-//   - insecure: 是否使用 HTTP（本地开发）
-func NewLangfuse(secretKey, publicKey, host string, insecure bool) Tracer {
+// NewLangfuse 从配置创建 Langfuse 追踪器
+func NewLangfuse(cfg config.LangfuseConfig) Tracer {
 	return &langfuseTracer{
-		enabled: secretKey != "" && publicKey != "",
+		cfg:     cfg,
+		enabled: cfg.SecretKey != "" && cfg.PublicKey != "",
 	}
 }
 
@@ -80,9 +78,12 @@ func (t *langfuseTracer) IsEnabled() bool {
 // lazyInit 延迟初始化 Langfuse
 func (t *langfuseTracer) lazyInit(ctx context.Context) error {
 	t.initOnce.Do(func() {
-		// 这里需要从配置读取实际参数
-		// 为了解耦，我们使用环境变量或全局配置
-		// 具体实现会在初始化时注入
+		clean, err := InitLangfuse(ctx, t.cfg.SecretKey, t.cfg.PublicKey, t.cfg.Host, t.cfg.Insecure)
+		if err != nil {
+			t.initErr = err
+			return
+		}
+		t.cleanup = clean
 	})
 	return t.initErr
 }
@@ -110,10 +111,11 @@ func (s *langfuseSpan) SetStatus(status Status, description string) {
 
 // RecordError 记录错误
 func (s *langfuseSpan) RecordError(err error) {
-	if s.span == nil {
+	if s.span == nil || err == nil {
 		return
 	}
 	s.span.SetAttributes(attribute.String("error.message", err.Error()))
+	s.span.SetAttributes(attribute.String(AttrObservationLevel, "ERROR"))
 }
 
 // End 结束 span
